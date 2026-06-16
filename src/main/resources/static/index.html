@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitoramento de Sensores</title>
+
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            background:#121212;
+            color:white;
+            padding:20px;
+        }
+
+        h1{
+            text-align:center;
+        }
+
+        #status{
+            text-align:center;
+            margin-bottom:20px;
+            font-weight:bold;
+        }
+
+        .container{
+            display:flex;
+            gap:20px;
+            justify-content:center;
+        }
+
+        .card{
+            width:250px;
+            background:#1f1f1f;
+            border-radius:10px;
+            padding:20px;
+            text-align:center;
+        }
+
+        .temperatura{
+            font-size:32px;
+            margin:15px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Monitoramento de Sensores</h1>
+
+<div id="status">
+    🟡 Conectando...
+</div>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Sala</h2>
+        <div id="salaTemp" class="temperatura">-- °C</div>
+        <div id="salaTime">--</div>
+    </div>
+
+    <div class="card">
+        <h2>Server</h2>
+        <div id="serverTemp" class="temperatura">-- °C</div>
+        <div id="serverTime">--</div>
+    </div>
+
+    <div class="card">
+        <h2>Externo</h2>
+        <div id="externoTemp" class="temperatura">-- °C</div>
+        <div id="externoTime">--</div>
+    </div>
+
+</div>
+
+<script>
+
+const source = new EventSource("/sensores/stream");
+
+source.onopen = () => {
+    document.getElementById("status").innerHTML =
+        "🟢 Conectado";
+};
+
+source.onerror = () => {
+    document.getElementById("status").innerHTML =
+        "🔴 Reconectando...";
+};
+
+source.addEventListener("temperatura", (event) => {
+
+    const dados = JSON.parse(event.data);
+
+    const sensor = dados.sensor;
+
+    document.getElementById(sensor + "Temp").innerHTML =
+        dados.valor.toFixed(2) + " °C";
+
+    document.getElementById(sensor + "Time").innerHTML =
+        new Date(dados.timestamp).toLocaleTimeString();
+
+});
+
+</script>
+
+</body>
+</html>
